@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Deadlining Database for Missing and Murdered Black Women</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Fonts: IBM Plex Sans Condensed (header) + Inter (body) -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+
+
+  <style>
+    :root {
+      --bg-body: #020617;
+      --bg-surface: #020819;
+      --bg-surface-soft: #020b1f;
+      --border-subtle: #1e293b;
+      --border-strong: #111827;
+
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+
+      --accent-blue: #1e90ff;        /* federal blue */
+      --accent-blue-muted: #0a4c95;  /* bar color */
+      --accent-focus: #3b82f6;
+
+      --badge-bg: #020617;
+      --badge-border: #334155;
+      --badge-text: #cbd5e1;
+
+      --murdered-color: #E11D48;     /* dark red */
+      --found-color: #60A5FA;        /* muted blue */
+      --unrecovered-color: #CBD5E1;  /* soft slate */
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #020617;
+      color: var(--text-main);
+    }
+
+    .page-shell {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 1.75rem 1.5rem 2.5rem;
+    }
+
+    /* ===== HEADER ===== */
+
+   .page-header {
+  margin-bottom: 2rem;
+}
+
+.page-header h1 {
+  margin: 0 0 0.35rem;
+  font-family: "Roboto Condensed", system-ui, -apple-system, sans-serif;
+  font-weight: 800;
+  font-size: clamp(2.3rem, 3.2vw, 3rem);
+  line-height: 1.08;
+  letter-spacing: 0.5px;   /* Tight and federal */
+  color: #f8fafc;
+  text-transform: uppercase;  /* ALL CAPS */
+}
+
+.page-header .region {
+  margin: 0;
+  font-family: "Roboto Condensed", system-ui, -apple-system, sans-serif;
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.22em;     /* More spacing than title */
+  text-transform: uppercase;  
+  color: #94a3b8;
+}
+
+    /* ===== CARDS / LAYOUT ===== */
+
+    .card {
+      background: var(--bg-surface);
+      border-radius: 0.9rem;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.75);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .card--soft {
+      background: var(--bg-surface-soft);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.75rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #e5e7eb;
+    }
+
+    .card-description {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+    }
+
+    /* ===== FILTERS ===== */
+
+    .filters {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.75rem;
+      margin-top: 0.75rem;
+      align-items: flex-end;
+    }
+
+    label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 0.2rem;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 0.42rem 0.55rem;
+      border-radius: 0.5rem;
+      border: 1px solid #334155;
+      background: #020617;
+      color: var(--text-main);
+      font-size: 0.88rem;
+      font-family: "Inter", sans-serif;
+    }
+
+    input::placeholder {
+      color: #6b7280;
+    }
+
+    input:focus,
+    select:focus {
+      outline: 2px solid var(--accent-focus);
+      outline-offset: 1px;
+      border-color: var(--accent-focus);
+    }
+
+    button {
+      padding: 0.55rem 0.95rem;
+      border-radius: 999px;
+      border: 1px solid #334155;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 500;
+      font-family: "Inter", sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      white-space: nowrap;
+      transition: background 0.08s ease-out, border-color 0.08s ease-out;
+      box-shadow: none;
+    }
+
+    button:hover {
+      background: #1e293b;
+      border-color: #475569;
+    }
+
+    button:active {
+      background: #020617;
+      border-color: #334155;
+    }
+
+    /* ===== RESULTS META / TABLE ===== */
+
+    .results-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      margin-top: 0.15rem;
+      color: var(--text-muted);
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    #activeFiltersText {
+      font-size: 0.78rem;
+      color: #a5b4fc;
+    }
+
+    .table-wrapper {
+      max-height: 420px;
+      overflow: auto;
+      margin-top: 0.5rem;
+      border-radius: 0.75rem;
+      border: 1px solid var(--border-strong);
+      background: #020617;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+      font-family: "Inter", sans-serif;
+    }
+
+    thead {
+      background: #020617;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    th,
+    td {
+      padding: 0.45rem 0.55rem;
+      border-bottom: 1px solid #111827;
+      vertical-align: top;
+    }
+
+    th {
+      text-align: left;
+      font-weight: 600;
+      color: #9ca3af;
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: #020819;
+    }
+
+    tr:hover td {
+      background: #020617;
+    }
+
+    a {
+      color: var(--accent-blue);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* ===== BADGES ===== */
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.15rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 500;
+      font-family: "Inter", sans-serif;
+      background: var(--badge-bg);
+      border: 1px solid var(--badge-border);
+      color: var(--badge-text);
+    }
+
+    .badge.murdered {
+      border-color: #7f1d1d;
+      color: var(--murdered-color);
+    }
+
+    .badge.found {
+      border-color: #1d4ed8;
+      color: var(--found-color);
+    }
+
+    .badge.unrecovered {
+      border-color: #334155;
+      color: var(--unrecovered-color);
+    }
+
+    /* ===== CHART ===== */
+
+    .chart-container {
+      position: relative;
+      height: 260px;
+      margin-top: 0.75rem;
+    }
+
+    @media (max-width: 640px) {
+      .page-shell {
+        padding: 1.25rem 1rem 2rem;
+      }
+
+      .page-header h1 {
+        font-size: 2.1rem;
+      }
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="page-header">
+      <h1>Deadlining Database for Missing and Murdered Black Women</h1>
+      <p class="region">DISTRICT OF COLUMBIA</p>
+    </header>
+
+
+    <!-- Advanced Search -->
+    <section class="card card--soft">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Advanced Search</div>
+          <p class="card-description">
+            Filter by name, location, case outcome, and range.
+          </p>
+        </div>
+      </div>
+
+      <div class="filters">
+        <div>
+          <label for="keyword">Keyword</label>
+          <input id="keyword" type="text" placeholder="Name, location, Case ID…" />
+        </div>
+
+        <div>
+          <label for="typeFilter">Type of Case</label>
+          <select id="typeFilter">
+            <option value="">All</option>
+            <option value="Missing Person">Missing Person</option>
+            <option value="Missing">Missing</option>
+            <option value="Murdered">Murdered</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="outcomeFilter">Outcome</label>
+          <select id="outcomeFilter">
+            <option value="">All</option>
+            <option value="Unrecovered">Unrecovered</option>
+            <option value="Found">Found</option>
+            <option value="Murdered">Murdered</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="minYear">DLC Year (From)</label>
+          <input id="minYear" type="number" placeholder="1960" />
+        </div>
+
+        <div>
+          <label for="maxYear">DLC Year (To)</label>
+          <input id="maxYear" type="number" placeholder="2025" />
+        </div>
+
+        <div>
+          <button id="resetBtn" type="button">Reset Filters</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Outcome Chart -->
+    <section class="card">
+      <div class="card-header">
+        <div class="card-title">Cases by Outcome</div>
+      </div>
+      <div class="chart-container">
+        <canvas id="outcomeChart"></canvas>
+      </div>
+    </section>
+
+    <!-- Results Table -->
+    <section class="card">
+      <div class="results-meta">
+        <span id="resultsCount">0 cases</span>
+        <span id="activeFiltersText"></span>
+      </div>
+      <div class="table-wrapper">
+        <table>
+         <thead>
+  <tr>
+    <th>MMDP ID</th>
+    <th>NamUs ID</th>
+    <th>Full Name</th>
+    <th>DLC</th>
+    <th>Demographics</th>
+    <th>Age at Disappearance</th>
+    <th>Current Age</th>
+    <th>Location Last Seen</th>
+    <th>Type</th>
+    <th>Outcome</th>
+    <th>Source</th>
+  </tr>
+</thead>
+
+          <tbody id="resultsBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    let allCases = [];
+    let filteredCases = [];
+    let outcomeChart = null;
+
+    function normalizeString(str) {
+      return (str || "").toString().toLowerCase();
+    }
+
+    function getYearFromDLC(row) {
+      const dlc = (row.DLC || "").toString().trim();
+      const match = dlc.match(/(\d{4})$/);
+      if (match) return parseInt(match[1], 10);
+      return null;
+    }
+
+    function getOutcomeCategory(row) {
+      const typeRaw = normalizeString(row.Type_of_Case || row["Type of Case"] || "");
+      const outcomeRaw = normalizeString(row.Outcome || row["Outcome:"] || "");
+
+      if (typeRaw.includes("murder")) return "Murdered";
+      if (outcomeRaw.includes("found")) return "Found";
+      if (outcomeRaw.includes("unrecovered")) return "Unrecovered";
+      if (!outcomeRaw && typeRaw.includes("missing")) return "Unrecovered";
+      return null;
+    }
+
+    function outcomeBadgeClass(label) {
+      const o = normalizeString(label);
+      if (o.includes("murder")) return "murdered";
+      if (o.includes("found")) return "found";
+      if (o.includes("unrecovered")) return "unrecovered";
+      return "";
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById("resultsBody");
+      tbody.innerHTML = "";
+
+      filteredCases.forEach(row => {
+        const tr = document.createElement("tr");
+
+        const ageDisp = row.Age_at_Disappearance || row["Age at Disappearance/Death"] || "";
+        const curAge = row.Current_Age || row["Current Age "] || "";
+
+        const type = row.Type_of_Case || row["Type of Case"] || "";
+        const rawOutcome = row.Outcome || row["Outcome:"] || "";
+        const derivedOutcome = getOutcomeCategory(row);
+        const displayOutcome = rawOutcome || derivedOutcome || "";
+
+        const sourceCell = row.Source || row["Source:"] || "";
+        const sourceLink = sourceCell && sourceCell.startsWith("http")
+          ? `<a href="${sourceCell}" target="_blank" rel="noopener noreferrer">Link</a>`
+          : sourceCell || "";
+
+        const outcomeClass = outcomeBadgeClass(displayOutcome);
+
+       tr.innerHTML = `
+  <td>${row["MMDP Case ID:"] || ""}</td>
+  <td>${row["NamUS Case ID:"] || ""}</td>
+  <td>${row["Full Name"] || ""}</td>
+  <td>${row["DLC:"] || ""}</td>
+  <td>${row["Demographics"] || ""}</td>
+  <td>${row["Age at Disappearance/Death"] || ""}</td>
+  <td>${row["Current Age "] || row["Current Age"] || ""}</td>
+  <td>${row["Location Last Seen"] || ""}</td>
+  <td>${row["Type of Case"] || ""}</td>
+  <td>${getOutcomeCategory(row)}</td>
+  <td><a href="${row["Source:"] || "#"}" target="_blank">Link</a></td>
+`;
+
+
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById("resultsCount").textContent =
+        `${filteredCases.length} case${filteredCases.length === 1 ? "" : "s"}`;
+    }
+
+ function renderOutcomeChart() {
+  const counts = {};
+  filteredCases.forEach(row => {
+    const cat = getOutcomeCategory(row);
+    if (!cat) return;
+    counts[cat] = (counts[cat] || 0) + 1;
+  });
+
+  const labels = Object.keys(counts);
+  const data = Object.values(counts);
+  const ctx = document.getElementById("outcomeChart").getContext("2d");
+
+  if (outcomeChart) {
+    outcomeChart.destroy();
+  }
+
+  outcomeChart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "Cases",
+          data,
+          borderRadius: 6,
+
+          // ⭐ NEW DOJ-STYLE NAVY — deep, muted, serious
+          backgroundColor: "rgba(20, 35, 70, 0.75)", 
+
+          // Slight darker border for definition
+          borderColor: "rgba(15, 25, 50, 1)",
+          borderWidth: 1.2
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: {
+          ticks: { color: "#e5e7eb" },
+          grid: { color: "#1f2937" }
+        },
+        y: {
+          beginAtZero: true,
+          ticks: { color: "#e5e7eb", stepSize: 1 },
+          grid: { color: "#1f2937" }
+        }
+      },
+      plugins: {
+        legend: {
+          labels: { color: "#e5e7eb" }
+        }
+      }
+    }
+  });
+}
+
+    function updateActiveFiltersText() {
+      const keyword = document.getElementById("keyword").value.trim();
+      const typeFilter = document.getElementById("typeFilter").value;
+      const outcomeFilter = document.getElementById("outcomeFilter").value;
+      const minYear = document.getElementById("minYear").value;
+      const maxYear = document.getElementById("maxYear").value;
+
+      const active = [];
+
+      if (keyword) active.push(`Keyword: "${keyword}"`);
+      if (typeFilter) active.push(`Type: ${typeFilter}`);
+      if (outcomeFilter) active.push(`Outcome: ${outcomeFilter}`);
+      if (minYear || maxYear) active.push(`Year: ${minYear || "…"}–${maxYear || "…"}`);
+
+      document.getElementById("activeFiltersText").textContent =
+        active.length ? "Filters – " + active.join(" | ") : "";
+    }
+
+    function applyFilters() {
+      const keyword = normalizeString(document.getElementById("keyword").value);
+      const typeFilter = normalizeString(document.getElementById("typeFilter").value);
+      const outcomeFilter = normalizeString(document.getElementById("outcomeFilter").value);
+      const minYearVal = document.getElementById("minYear").value;
+      const maxYearVal = document.getElementById("maxYear").value;
+      const minYear = minYearVal ? parseInt(minYearVal, 10) : null;
+      const maxYear = maxYearVal ? parseInt(maxYearVal, 10) : null;
+
+      filteredCases = allCases.filter(row => {
+        if (keyword) {
+          const haystack = [
+            row.MMDP_Case_ID || row["MMDP Case ID:"] || "",
+            row.Full_Name || row["Full Name"] || "",
+            row.Location_Last_Seen || row["Location Last Seen"] || "",
+            row.DLC || ""
+          ].map(normalizeString).join(" | ");
+
+          if (!haystack.includes(keyword)) return false;
+        }
+
+        if (typeFilter) {
+          const typeVal = normalizeString(row.Type_of_Case || row["Type of Case"] || "");
+          if (!typeVal.includes(typeFilter)) return false;
+        }
+
+        if (outcomeFilter) {
+          const derived = getOutcomeCategory(row) || "";
+          if (!normalizeString(derived).includes(normalizeString(outcomeFilter))) return false;
+        }
+
+        if (minYear || maxYear) {
+          const yr = getYearFromDLC(row);
+          if (!yr) return false;
+          if (minYear && yr < minYear) return false;
+          if (maxYear && yr > maxYear) return false;
+        }
+
+        return true;
+      });
+
+      updateActiveFiltersText();
+      renderTable();
+      renderOutcomeChart();
+    }
+
+    function attachFilterListeners() {
+      document.getElementById("keyword").addEventListener("input", applyFilters);
+      document.getElementById("typeFilter").addEventListener("change", applyFilters);
+      document.getElementById("outcomeFilter").addEventListener("change", applyFilters);
+      document.getElementById("minYear").addEventListener("input", applyFilters);
+      document.getElementById("maxYear").addEventListener("input", applyFilters);
+      document.getElementById("resetBtn").addEventListener("click", () => {
+        document.getElementById("keyword").value = "";
+        document.getElementById("typeFilter").value = "";
+        document.getElementById("outcomeFilter").value = "";
+        document.getElementById("minYear").value = "";
+        document.getElementById("maxYear").value = "";
+        filteredCases = [...allCases];
+        updateActiveFiltersText();
+        renderTable();
+        renderOutcomeChart();
+      });
+    }
+
+    function loadData() {
+      Papa.parse("cases.csv", {
+        download: true,
+        header: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+          allCases = results.data.filter(row => row.MMDP_Case_ID || row["MMDP Case ID:"]);
+          filteredCases = [...allCases];
+          renderTable();
+          renderOutcomeChart();
+        },
+        error: function(err) {
+          console.error("Error loading CSV:", err);
+        }
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      attachFilterListeners();
+      loadData();
+    });
+  </script>
+</body>
+</html>
